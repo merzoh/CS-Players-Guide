@@ -7,7 +7,7 @@
             string password = ConsoleHelper.RequestPassword();
             if (PasswordValidator.ValidatePassword(password))
                 Console.WriteLine("Password is valid.");
-            else if (password == "quit")
+            else if (password.ToLower() == "quit")
                 Environment.Exit(0);
             else
                 Console.WriteLine("Password is invalid.");
@@ -20,24 +20,19 @@ public static class PasswordValidator
 {
     //FIELDS
     //PROPERTIES
-    private static bool IsCorrectLength { get; set; }
-    private static bool HasUppercase { get; set; }
-    private static bool HasLowercase { get; set; }
-    private static bool HasDigit { get; set; }
-    private static bool HasUpperT { get; set; }
-    private static bool HasAmpersand { get; set; }
+    
     //CONSTRUCTORS
 
     //METHODS
     public static bool ValidatePassword(string password)
     {
-        IsCorrectLength = password.Length >= 6 && password.Length <= 13;
-        HasUppercase = password.Any(char.IsUpper);
-        HasLowercase = password.Any(char.IsLower);
-        HasDigit = password.Any(char.IsDigit);
-        HasUpperT = password.Contains('T');
-        HasAmpersand = password.Contains('&');
-        return IsCorrectLength && HasUppercase && HasLowercase && HasDigit && !HasUpperT && !HasAmpersand;        
+        bool isCorrectLength = password.Length >= 6 && password.Length <= 13;
+        bool hasUppercase = password.Any(char.IsUpper);
+        bool hasLowercase = password.Any(char.IsLower);
+        bool hasDigit = password.Any(char.IsDigit);
+        bool hasUpperT = password.Contains('T');
+        bool hasAmpersand = password.Contains('&');
+        return isCorrectLength && hasUppercase && hasLowercase && hasDigit && !hasUpperT && !hasAmpersand;        
     }
 }
 public static class ConsoleHelper
