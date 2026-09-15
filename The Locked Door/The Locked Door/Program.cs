@@ -1,48 +1,55 @@
-﻿Doors door = new Doors(ConsoleHelper.GetPasscode("Enter the initial passcode: "));
-Console.Clear();
-while (true)
+﻿class Program
 {
-    switch (ConsoleHelper.RequestCommand().ToLower())
+    static void Main()
     {
-        case "open":
-            door.Open();
-            break;
-        case "close":
-            door.Close();
-            break;
-        case "lock":
-            door.LockDoor();
-            break;
-        case "unlock":
-            door.UnlockDoor();
-            break;
-        case "exit":
-            Environment.Exit(0);
-            break;
-        case "change password":
-            if (door.ChangePassword())
+        Doors door = new Doors(ConsoleHelper.GetPasscode("Enter the initial passcode: "));
+        Console.Clear();
+        while (true)
+        {
+            switch (ConsoleHelper.RequestCommand().ToLower())
             {
-                Console.WriteLine("Passcode changed successfully.");
-                Console.Write("Press any key to continue...");
-                Console.ReadKey(true);
-                Console.Clear();
+                case "open":
+                    door.Open();
+                    break;
+                case "close":
+                    door.Close();
+                    break;
+                case "lock":
+                    door.LockDoor();
+                    break;
+                case "unlock":
+                    door.UnlockDoor();
+                    break;
+                case "exit":
+                    Environment.Exit(0);
+                    break;
+                case "change password":
+                    if (door.ChangePassword())
+                    {
+                        Console.WriteLine("Passcode changed successfully.");
+                        Console.Write("Press any key to continue...");
+                        Console.ReadKey(true);
+                        Console.Clear();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Incorrect passcode. Passcode change failed.");
+                    }
+                    break;
+                case "clear screen":
+                    Console.Clear();
+                    break;
+                case "status":
+                    Console.WriteLine($"The door is currently {door.State.ToString().ToLower()}.");
+                    break;
+                default:
+                    Console.WriteLine("Invalid command. Please try again.");
+                    break;
             }
-            else
-            {
-                Console.WriteLine("Incorrect passcode. Passcode change failed.");
-            }
-            break;
-        case "clear screen":
-            Console.Clear();
-            break;
-        case "status":
-            Console.WriteLine($"The door is currently {door.State.ToString().ToLower()}.");
-            break;
-        default:
-            Console.WriteLine("Invalid command. Please try again.");
-            break;
+        }
     }
 }
+
 
 
 //ENUM
@@ -155,13 +162,39 @@ public class Doors
 
 public static class ConsoleHelper
 {
+    public static string ReadMaskedKey(char maskChar = '*')
+    {
+        string input = string.Empty;
+        while (true)
+        {
+            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            if (keyInfo.Key == ConsoleKey.Enter)
+            {
+                Console.WriteLine();
+                return input;
+            }
+            else if (keyInfo.Key == ConsoleKey.Backspace)
+            {
+                if (input.Length > 0)
+                {
+                    Console.Write("\b \b");
+                    input = input[..^1];
+                }
+            }
+            else if (!char.IsControl(keyInfo.KeyChar))
+            {
+                input += keyInfo.KeyChar;
+                Console.Write(maskChar);
+            }
+        }
+    }
     public static int GetPasscode(string text)
     {
         int userInput;
         do
         {
             Console.Write(text);
-            while (!int.TryParse(Console.ReadLine(), out userInput))
+            while (!int.TryParse(ReadMaskedKey(), out userInput))
             {
                 Console.WriteLine("Invalid input. Please enter a valid passcode.");
                 Console.Write(text);
