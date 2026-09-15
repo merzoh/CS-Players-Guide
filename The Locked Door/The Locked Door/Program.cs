@@ -3,7 +3,6 @@
     static void Main()
     {
         Doors door = new Doors(ConsoleHelper.GetPasscode("Enter the initial passcode: "));
-        Console.Clear();
         while (true)
         {
             switch (ConsoleHelper.RequestCommand().ToLower())
@@ -29,7 +28,7 @@
                         Console.WriteLine("Passcode changed successfully.");
                         Console.Write("Press any key to continue...");
                         Console.ReadKey(true);
-                        Console.Clear();
+                        Console.WriteLine();
                     }
                     else
                     {
