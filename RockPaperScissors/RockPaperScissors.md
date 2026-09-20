@@ -1,6 +1,6 @@
 ```mermaid
 classDiagram
-	class GameManager
+	class GameManager~T~
 	{
 		-Players~T~ Player1
 		-Players~T~ Player2
