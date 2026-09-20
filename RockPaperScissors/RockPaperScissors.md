@@ -6,7 +6,7 @@ classDiagram
 		-Players~T~ Player2
 		-ChoiceTuple PlayerChoices
 		-RecordTuple Record
-		-CheckWinner() int
+		-CheckWinner() : int
 	}
 
 ```
