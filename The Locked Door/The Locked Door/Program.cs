@@ -1,148 +1,87 @@
-﻿class Program
+﻿using ConsoleUtil;
+namespace The_Locked_Door;
+class Program
 {
     static void Main()
     {
-        Doors door = new Doors(ConsoleHelper.GetPasscode("Enter the initial passcode: "));
-        while (true)
-        {
-            switch (ConsoleHelper.RequestCommand().ToLower())
-            {
-                case "open":
-                    door.Open();
-                    break;
-                case "close":
-                    door.Close();
-                    break;
-                case "lock":
-                    door.LockDoor();
-                    break;
-                case "unlock":
-                    door.UnlockDoor();
-                    break;
-                case "exit":
-                    Environment.Exit(0);
-                    break;
-                case "change password":
-                    if (door.ChangePassword())
-                    {
-                        Console.WriteLine("Passcode changed successfully.");
-                        Console.Write("Press any key to continue...");
-                        Console.ReadKey(true);
-                        Console.WriteLine();
-                    }
-                    else
-                    {
-                        Console.WriteLine("Incorrect passcode. Passcode change failed.");
-                    }
-                    break;
-                case "clear screen":
-                    Console.Clear();
-                    break;
-                case "status":
-                    Console.WriteLine($"The door is currently {door.State.ToString().ToLower()}.");
-                    break;
-                default:
-                    Console.WriteLine("Invalid command. Please try again.");
-                    break;
-            }
-        }
+        Doors door = new Doors();
+        door.Run();
+        
     }
-}
-
-
-
-//ENUM
-public enum DoorState
-{
-    Locked,
-    Open,
-    Closed
 }
 //Classes
 public class Doors
 {
-    //Properties
-    public DoorState State { get; private set; } = DoorState.Closed;
+    //Properties and Fields
+    private DoorStates State { get; set; } = DoorStates.Closed;
     private int Passcode { get; set; }
+    private MenuManager<DoorOptions> manager;
 
     //Methods
-    public void Open()
+    private int GetPasscode(string text)
+    {
+        int userInput;
+        do
+        {
+            ConsoleHelpers.DrawWindow(text);
+            while (!int.TryParse(ConsoleHelpers.ReadMaskedKey(), out userInput))
+            {
+                ConsoleHelpers.DrawWindow("Invalid input. Please enter a valid passcode.");
+                Console.SetCursorPosition((Console.WindowWidth / 2) - 2, (int)(Console.WindowHeight * (2f / 3f)));
+            }
+        } while (userInput < 0 || userInput > 9999);
+        return userInput;
+    }
+    private void Open()
     {
         switch (State)
         {
-            case DoorState.Locked:
-                Console.WriteLine("The door is locked. Please unlock it first.");
+            case DoorStates.Locked:
+                ConsoleHelpers.DrawWindow("The door is locked. Please unlock it first.  Press any key to continue.");
+                Console.ReadKey(true);
                 break;
-            case DoorState.Closed:
-                State = DoorState.Open;
-                Console.WriteLine("The door is now open.");
+            case DoorStates.Closed:
+                State = DoorStates.Open;
                 break;
-            case DoorState.Open:
-                Console.WriteLine("The door is already open.");
-                break;
+            
         }
     }
-    public void Close ()
+    private void Close ()
     {
-        switch (State)
+        if (State == DoorStates.Open)
         {
-            case DoorState.Locked:
-                Console.WriteLine("The door is already closed.");
-                break;
-            case DoorState.Closed:
-                Console.WriteLine("The door is already closed.");
-                break;
-            case DoorState.Open:
-                State = DoorState.Closed;
-                Console.WriteLine("The door is now closed.");
-                break;
+            State = DoorStates.Closed;
         }
     }
-    public void LockDoor()
+    private void LockDoor()
     {
-        switch (State)
+        if (State == DoorStates.Closed)
         {
-            case DoorState.Locked:
-                Console.WriteLine("the door is already locked.");
-                break;
-            case DoorState.Closed:
-                State = DoorState.Locked;
-                Console.WriteLine("The door is now locked.");
-                break;
-            case DoorState.Open:
-                Console.WriteLine("Please close the door before locking it.");
-                break;
+            State = DoorStates.Locked;
         }
     }
-    public void UnlockDoor()
+    private void UnlockDoor()
     {
-        switch (State)
+        if (State == DoorStates.Locked)
         {
-            case DoorState.Locked:
-                if ((VerifyPasscode(ConsoleHelper.GetPasscode("Enter the passcode to unlock the door: "))))
-                {
-                    State = DoorState.Closed;
-                    Console.WriteLine("The door is now unlocked.");
-                }
-                else
-                {
-                    Console.WriteLine("Incorrect passcode. The door remains locked.");
-                }
-                break;
-            case DoorState.Closed:
-                Console.WriteLine("The door is already unlocked.");
-                break;
-            case DoorState.Open:
-                Console.WriteLine("The door is already unlocked.");
-                break;
+            if ((VerifyPasscode(GetPasscode("Enter the passcode to unlock the door: "))))
+            {
+                State = DoorStates.Closed;
+                ConsoleHelpers.DrawWindow("The door has been unlocked. Press any key to continue.");
+                Console.ReadKey(true);
+            }
+            else
+            {
+                ConsoleHelpers.DrawWindow("Incorrect passcode. The door remains locked. Press any key to continue.");
+                Console.ReadKey(true);
+            }
         }
     }
-    public bool ChangePassword()
+    private bool ChangePassword()
     {
-        if (VerifyPasscode(ConsoleHelper.GetPasscode("Enter the current passcode: ")))
+        if (VerifyPasscode(GetPasscode("Enter the current passcode: ")))
         {
-            Console.WriteLine("You may now change the passcode.");
-            Passcode = ConsoleHelper.GetPasscode("Enter the new passcode: ");
+            Passcode = GetPasscode("Enter the new passcode: ");
             return true;
         }
         else
@@ -150,64 +89,50 @@ public class Doors
         
         
     }
-    public bool VerifyPasscode(int userEntry) => userEntry == Passcode;
-    //Constructors
-    public Doors(int passcode)
-    {
-        Passcode = passcode;
-    }
+    private bool VerifyPasscode(int userEntry) => userEntry == Passcode;
 
-}
-
-public static class ConsoleHelper
-{
-    public static string ReadMaskedKey(char maskChar = '*')
+    public void Run()
     {
-        string input = string.Empty;
         while (true)
         {
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-            if (keyInfo.Key == ConsoleKey.Enter)
+            switch (manager.Run($"The door is currently {State.ToString().ToLower()}. Pick an option."))
             {
-                Console.WriteLine();
-                return input;
-            }
-            else if (keyInfo.Key == ConsoleKey.Backspace)
-            {
-                if (input.Length > 0)
-                {
-                    Console.Write("\b \b");
-                    input = input[..^1];
-                }
-            }
-            else if (!char.IsControl(keyInfo.KeyChar))
-            {
-                input += keyInfo.KeyChar;
-                Console.Write(maskChar);
+                case DoorOptions.Open:
+                    Open();
+                    break;
+                case DoorOptions.Close:
+                    Close();
+                    break;
+                case DoorOptions.Lock:
+                    LockDoor();
+                    break;
+                case DoorOptions.Unlock:
+                    UnlockDoor();
+                    break;
+                case DoorOptions.Exit:
+                    Environment.Exit(0);
+                    break;
+                case DoorOptions.ChangePassword:
+                    if (ChangePassword())
+                    {
+                        ConsoleHelpers.DrawWindow("Passcode changed successfully. Press any key to continue.");
+                        Console.ReadKey(true);
+                    }
+                    else
+                    {
+                        ConsoleHelpers.DrawWindow("Incorrect passcode. Passcode change failed. Press any key to continue.");
+                        Console.ReadKey(true);
+                    }
+                    break;
             }
         }
     }
-    public static int GetPasscode(string text)
+    //Constructors
+    public Doors()
     {
-        int userInput;
-        do
-        {
-            Console.Write(text);
-            while (!int.TryParse(ReadMaskedKey(), out userInput))
-            {
-                Console.WriteLine("Invalid input. Please enter a valid passcode.");
-                Console.Write(text);
-            }
-        } while (userInput < 0 || userInput > 9999);
-        return userInput;
+        manager = new MenuManager<DoorOptions>();
+        Passcode = GetPasscode("Enter the initial passcode: ");
     }
-    public static string RequestCommand()
-    {
-        string entry;
-        Console.Write("Enter a command (open, close, lock, unlock, change password, status, clear screen, exit): ");
-        entry = Console.ReadLine();
-        if (entry == null)
-            entry = "";
-        return entry;
-    }
+
+
 }
