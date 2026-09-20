@@ -15,7 +15,7 @@ public class Doors
     //Properties and Fields
     private DoorStates State { get; set; } = DoorStates.Closed;
     private int Passcode { get; set; }
-    private MenuManager<DoorOptions> manager;
+    private readonly MenuManager<DoorOptions> manager = new MenuManager<DoorOptions>();
 
     //Methods
     private int GetPasscode(string text)
@@ -26,8 +26,7 @@ public class Doors
             ConsoleHelpers.DrawWindow(text);
             while (!int.TryParse(ConsoleHelpers.ReadMaskedKey(), out userInput))
             {
-                ConsoleHelpers.DrawWindow("Invalid input. Please enter a valid passcode.");
-                Console.SetCursorPosition((Console.WindowWidth / 2) - 2, (int)(Console.WindowHeight * (2f / 3f)));
+                ConsoleHelpers.DrawWindow("Invalid input. Please enter a valid passcode: ");
             }
         } while (userInput < 0 || userInput > 9999);
         return userInput;
@@ -130,7 +129,6 @@ public class Doors
     //Constructors
     public Doors()
     {
-        manager = new MenuManager<DoorOptions>();
         Passcode = GetPasscode("Enter the initial passcode: ");
     }
 
