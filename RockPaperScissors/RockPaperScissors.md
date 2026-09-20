@@ -2,10 +2,10 @@
 classDiagram
 	class GameManager
 	{
-		-Players~T~ player1
-		-Players~T~ player2
-		-(var player1Choice, var player2Choice) playerChoices
-		-(int player1Wins, int player2Wins, int draws) record
+		-Players~T~ Player1
+		-Players~T~ Player2
+		-(var player1Choice, var player2Choice) PlayerChoices
+		-(int player1Wins, int player2Wins, int draws) Record
 		-CheckWinner()
 	}
 
