@@ -58,7 +58,12 @@ internal class Player
         {
             board[selectedIndex.x, selectedIndex.y].SetMarker(PlayerMark);
             Console.SetCursorPosition(board[selectedIndex.x, selectedIndex.y].TilePosition.x, board[selectedIndex.x, selectedIndex.y].TilePosition.y);
+            if (PlayerMark == TileOptions.X)
+                Console.ForegroundColor = ConsoleColor.Blue;
+            else
+                Console.ForegroundColor = ConsoleColor.Red;
             Console.Write(board[selectedIndex.x, selectedIndex.y].PlayerMarking.ToString());
+            Console.ResetColor();
             Console.SetCursorPosition(board[selectedIndex.x, selectedIndex.y].TilePosition.x - 2, board[selectedIndex.x, selectedIndex.y].TilePosition.y);
             Console.Write(" ");
             Console.SetCursorPosition(board[selectedIndex.x, selectedIndex.y].TilePosition.x + 2, board[selectedIndex.x, selectedIndex.y].TilePosition.y);
