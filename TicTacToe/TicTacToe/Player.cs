@@ -73,12 +73,6 @@ internal class Player
             Console.Write(" ");
             return false;
         }
-        
-
-
-
-
-
     }
     public Player(TileOptions playerMark)
     {
