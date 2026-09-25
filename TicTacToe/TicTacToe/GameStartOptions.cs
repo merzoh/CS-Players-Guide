@@ -6,6 +6,7 @@ namespace TicTacToe;
 
 enum GameStartOptions
 {
-    PlayerX,
-    PlayerO
+    X,
+    O,
+    Alternating
 }

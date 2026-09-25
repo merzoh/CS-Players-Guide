@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleUtil;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +7,21 @@ namespace TicTacToe;
 
 internal class Player
 {
+    
+    public int WinCount { get; private set; }
     public TileOptions PlayerMark { get; }
+    public string PlayerName { get; private set; }
+    public void SetName(string prompt)
+    {
+        ConsoleHelpers.DrawWindow(prompt);
+        do
+        {
+            PlayerName = Console.ReadLine();
+        } while (PlayerName == string.Empty);
+        
+
+    }
+    public void UpdateWins() => WinCount++;
     public bool GetSelection(GameBoard[,] board)
     {
         Console.SetCursorPosition(board[0, 0].TilePosition.x - 2, board[0, 0].TilePosition.y);
@@ -59,7 +74,10 @@ internal class Player
             board[selectedIndex.x, selectedIndex.y].SetMarker(PlayerMark);
             Console.SetCursorPosition(board[selectedIndex.x, selectedIndex.y].TilePosition.x, board[selectedIndex.x, selectedIndex.y].TilePosition.y);
             if (PlayerMark == TileOptions.X)
+            {
                 Console.ForegroundColor = ConsoleColor.Blue;
+                Console.BackgroundColor = ConsoleColor.Black;
+            }
             else
                 Console.ForegroundColor = ConsoleColor.Red;
             Console.Write(board[selectedIndex.x, selectedIndex.y].PlayerMarking.ToString());
@@ -82,5 +100,6 @@ internal class Player
     public Player(TileOptions playerMark)
     {
         PlayerMark = playerMark;
+        SetName($"Enter a name for Player {this.PlayerMark}: ");
     }
 }
