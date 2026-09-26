@@ -28,39 +28,38 @@ internal class GameManager
     {
         MenuManager<GameStartOptions> startManager = new MenuManager<GameStartOptions>();
         FirstPlayer = startManager.Run("Which player should go first?");
-        switch (FirstPlayer)
+        
+        while (true)
         {
-            case GameStartOptions.O:
-                IsPlayerXTurn = false;
-                break;
-            default:
-                break;
-        } while (true)
-        {
-            if (FirstPlayer == GameStartOptions.Alternating)
+            switch (FirstPlayer)
             {
-                if (FirstRun)
-                {
-                    if (FirstPlayer == GameStartOptions.X)
-                        XStartedFirstLast = true;
-                    else
-                        XStartedFirstLast = false;
-                }
-                else
-                {
-                    if (XStartedFirstLast == true)
+                case GameStartOptions.O:
+                    IsPlayerXTurn = false;
+                    break;
+                case GameStartOptions.Alternating:
+                    if (FirstRun)
                     {
-                        IsPlayerXTurn = false;
-                        XStartedFirstLast = false;
+                        XStartedFirstLast = true;
+                        FirstRun = false;
                     }
                     else
                     {
-                        IsPlayerXTurn = true;
-                        XStartedFirstLast = true;
+                        if (XStartedFirstLast == true)
+                        {
+                            IsPlayerXTurn = false;
+                            XStartedFirstLast = false;
+                        }
+                        else
+                        {
+                            IsPlayerXTurn = true;
+                            XStartedFirstLast = true;
+                        }
                     }
-                }
+                    break;
+                case GameStartOptions.X:
+                    IsPlayerXTurn = true;
+                    break;
             }
-            
             Run();
             ResetGame();
         }
@@ -127,11 +126,14 @@ internal class GameManager
             playerHasWon = CheckWinConditions();
             if (!playerHasWon && MovesMade == 9)
             {
-                Console.SetCursorPosition(0, 2);
+                Console.SetCursorPosition(0, board[1, 2].TilePosition.y + 4);
                 Console.Write(new string(' ', Console.WindowWidth - 1));
                 Console.SetCursorPosition((Console.WindowWidth - "Draw".Length) / 2, board[1, 2].TilePosition.y + 4);
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("Draw");
+                Console.ResetColor();
                 Draws++;
+                DrawWinCounter();
                 Console.ReadKey(true);
                 MenuManager<GameContinueOptions> continueManager = new MenuManager<GameContinueOptions>();
                 GameContinueOptions continueChoice = continueManager.Run("Would you like to play again?");
@@ -195,7 +197,10 @@ internal class GameManager
                 Console.SetCursorPosition(0, board[1, 2].TilePosition.y + 4);
                 Console.Write(new string(' ', Console.WindowWidth - 1));
                 Console.SetCursorPosition((Console.WindowWidth - winningPlayer.Length) / 2, board[1, 2].TilePosition.y + 4);
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write(winningPlayer);
+                Console.ResetColor();
+                DrawWinCounter();
                 return true;
             }
         }
