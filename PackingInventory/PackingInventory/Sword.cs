@@ -6,5 +6,6 @@ internal class Sword : InventoryItem
     {
         this.Weight = 5;
         this.Volume = 3;
+        this.Name = "Sword";
     }
 }

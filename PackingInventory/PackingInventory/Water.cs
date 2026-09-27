@@ -5,5 +5,6 @@ internal class Water : InventoryItem
     {
         this.Weight = 2;
         this.Volume = 3;
+        this.Name = "Water";
     }
 }

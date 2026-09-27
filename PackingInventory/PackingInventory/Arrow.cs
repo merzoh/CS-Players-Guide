@@ -6,5 +6,6 @@ internal class Arrow : InventoryItem
     {
         this.Weight = 0.1f;
         this.Volume = 0.05f;
+        this.Name = "Arrow";
     }
 }

@@ -6,5 +6,6 @@ internal class Rope : InventoryItem
     {
         this.Weight = 1;
         this.Volume = 1.5f;
+        this.Name = "Rope";
     }
 }
