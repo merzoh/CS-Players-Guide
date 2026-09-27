@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../../Utilities/ConsoleUtil/ConsoleUtil.csproj" />
+  <Project Path="PackingInventory/PackingInventory.csproj" />
+</Solution>
