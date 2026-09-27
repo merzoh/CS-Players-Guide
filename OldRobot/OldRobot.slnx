@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../../Utilities/ConsoleUtil/ConsoleUtil.csproj" />
+  <Project Path="OldRobot/OldRobot.csproj" />
+</Solution>
