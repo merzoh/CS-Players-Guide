@@ -44,6 +44,7 @@ internal class Player
                             }
                                 
                         }
+                        PackRendering.DisplayStatus(playerPack.Items, playerPack);
                         
                     }
                     break;

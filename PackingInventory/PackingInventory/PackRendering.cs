@@ -16,8 +16,8 @@ internal static class PackRendering
             
             if (item != null)
             {
-                Console.SetCursorPosition((Console.WindowWidth - item.Name.Length) / 2, yPos);
-                Console.Write(item.Name);
+                Console.SetCursorPosition((Console.WindowWidth - item.ToString().Length) / 2, yPos);
+                Console.Write(item.ToString());
             }
             else
             {
