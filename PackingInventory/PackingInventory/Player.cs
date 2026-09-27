@@ -15,33 +15,33 @@ internal class Player
                     ItemOptions item;
                     while ((item = GetItemChoice()) != ItemOptions.Back)
                     {
-
-                        InventoryItem newItem = item switch
-                        {
-                            ItemOptions.Arrow => new Arrow(),
-                            ItemOptions.Bow => new Bow(),
-                            ItemOptions.Rope => new Rope(),
-                            ItemOptions.Water => new Water(),
-                            ItemOptions.Food => new Food(),
-                            ItemOptions.Sword => new Sword()
-
-                        };
                         int quantity;
-
                         do
                         {
                             int.TryParse(ConsoleHelpers.GetInput("How many would you like to pack: "), out quantity);
                         } while (quantity < 0);
                         for (int i = 0; i < quantity; i++)
                         {
+                            InventoryItem newItem = item switch
+                            {
+                                ItemOptions.Arrow => new Arrow(),
+                                ItemOptions.Bow => new Bow(),
+                                ItemOptions.Rope => new Rope(),
+                                ItemOptions.Water => new Water(),
+                                ItemOptions.Food => new Food(),
+                                ItemOptions.Sword => new Sword()
+
+                            };
                             if (playerPack.Add(newItem))
                             {
                                 if (i == quantity - 1)
                                     PackRendering.DisplayItemAdded(item, quantity);
                             }
                             else
-                                PackRendering.DisplayFailureToAdd(item, quantity - i, i
-                                    );
+                            {
+                                PackRendering.DisplayFailureToAdd(item, quantity - i, i);
+                                break;
+                            }
                                 
                         }
                         
