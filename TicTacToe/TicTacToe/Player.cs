@@ -13,10 +13,10 @@ internal class Player
     public string PlayerName { get; private set; }
     public void SetName(string prompt)
     {
-        ConsoleHelpers.DrawWindow(prompt);
+        
         do
         {
-            PlayerName = Console.ReadLine();
+            PlayerName = ConsoleHelpers.GetInput(prompt);
         } while (PlayerName == string.Empty);
         
 
