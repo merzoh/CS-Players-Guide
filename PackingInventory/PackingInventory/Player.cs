@@ -15,45 +15,36 @@ internal class Player
                     ItemOptions item;
                     while ((item = GetItemChoice()) != ItemOptions.Back)
                     {
-                        switch (item)
+
+                        InventoryItem newItem = item switch
                         {
-                            case ItemOptions.Arrow:
-                                if (!playerPack.Add(new Arrow()))
-                                    PackRendering.DisplayFailureToAdd(item);
-                                else
-                                    PackRendering.DisplayItemAdded(item);
-                                break;
-                            case ItemOptions.Bow:
-                                if (!playerPack.Add(new Bow()))
-                                    PackRendering.DisplayFailureToAdd(item);
-                                else
-                                    PackRendering.DisplayItemAdded(item);
-                                break;
-                            case ItemOptions.Rope:
-                                if (!playerPack.Add(new Rope()))
-                                    PackRendering.DisplayFailureToAdd(item);
-                                else
-                                    PackRendering.DisplayItemAdded(item);
-                                break;
-                            case ItemOptions.Water:
-                                if (!playerPack.Add(new Water()))
-                                    PackRendering.DisplayFailureToAdd(item);
-                                else
-                                    PackRendering.DisplayItemAdded(item);
-                                break;
-                            case ItemOptions.Food:
-                                if (!playerPack.Add(new Food()))
-                                    PackRendering.DisplayFailureToAdd(item);
-                                else
-                                    PackRendering.DisplayItemAdded(item);
-                                break;
-                            case ItemOptions.Sword:
-                                if (!playerPack.Add(new Sword()))
-                                    PackRendering.DisplayFailureToAdd(item);
-                                else
-                                    PackRendering.DisplayItemAdded(item);
-                                break;
+                            ItemOptions.Arrow => new Arrow(),
+                            ItemOptions.Bow => new Bow(),
+                            ItemOptions.Rope => new Rope(),
+                            ItemOptions.Water => new Water(),
+                            ItemOptions.Food => new Food(),
+                            ItemOptions.Sword => new Sword()
+
+                        };
+                        int quantity;
+
+                        do
+                        {
+                            int.TryParse(ConsoleHelpers.GetInput("How many would you like to pack: "), out quantity);
+                        } while (quantity < 0);
+                        for (int i = 0; i < quantity; i++)
+                        {
+                            if (playerPack.Add(newItem))
+                            {
+                                if (i == quantity - 1)
+                                    PackRendering.DisplayItemAdded(item, quantity);
+                            }
+                            else
+                                PackRendering.DisplayFailureToAdd(item, quantity - i, i
+                                    );
+                                
                         }
+                        
                     }
                     break;
                 case PackOptions.Status:

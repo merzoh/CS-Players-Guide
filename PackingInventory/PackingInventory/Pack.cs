@@ -20,7 +20,7 @@ internal class Pack
     public InventoryItem[] Items { get; private set; }
     public bool Add(InventoryItem item)
     {
-        if (CurrentItemCount != MaxItems && CurrentWeight + item.Weight < MaxWeight && CurrentVolume + item.Volume < MaxVolume)
+        if (CurrentItemCount != MaxItems && CurrentWeight + item.Weight <= MaxWeight && CurrentVolume + item.Volume <= MaxVolume)
         {
             Items[CurrentItemCount] = item;
             CurrentWeight += item.Weight;

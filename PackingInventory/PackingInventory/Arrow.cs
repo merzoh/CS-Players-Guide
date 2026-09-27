@@ -2,10 +2,5 @@ namespace PackingInventory;
 
 internal class Arrow : InventoryItem
 {
-    public Arrow()
-    {
-        this.Weight = 0.1f;
-        this.Volume = 0.05f;
-        this.Name = "Arrow";
-    }
+    public Arrow() : base(0.1f, 0.05f, "Arrow") { }
 }

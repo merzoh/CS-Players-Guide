@@ -33,9 +33,9 @@ internal static class PackRendering
         Console.Write("Press any key to return...");
         Console.ReadKey(true);
     }
-    public static void DisplayFailureToAdd(ItemOptions item)
+    public static void DisplayFailureToAdd(ItemOptions item, int quantityRemaining, int quantityAdded)
     {
-        string failMessage = $"Failure to add {item.ToString()}. Press any key to continue...";
+        string failMessage = $"Added {quantityAdded} {item.ToString()} to pack. Failed to add remaining {quantityRemaining} {item.ToString()} to pack. Press any key to continue...";
         Console.SetCursorPosition(0, (int)(Console.WindowHeight * (2f / 3f)) - 1);
         Console.Write(new string(' ', Console.WindowWidth - 1));
         Console.SetCursorPosition((Console.WindowWidth - failMessage.Length) / 2, (int)((Console.WindowHeight * (2f / 3f)) - 1));
@@ -43,9 +43,9 @@ internal static class PackRendering
         Console.ReadKey(true);
         
     }
-    public static void DisplayItemAdded(ItemOptions item)
+    public static void DisplayItemAdded(ItemOptions item, int quantityAdded)
     {
-        string addMessage = $"Added {item.ToString()} to pack. Press any key to continue...";
+        string addMessage = $"Added {quantityAdded} {item.ToString()} to pack. Press any key to continue...";
         Console.SetCursorPosition(0, (int)(Console.WindowHeight * (2f / 3f)) - 1);
         Console.Write(new string(' ', Console.WindowWidth - 1));
         Console.SetCursorPosition((Console.WindowWidth - addMessage.Length) / 2, (int)((Console.WindowHeight * (2f / 3f)) - 1));

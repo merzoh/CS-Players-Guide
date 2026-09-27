@@ -5,8 +5,10 @@ internal class InventoryItem
     public float Weight { get; protected set; }
     public float Volume { get; protected set; }
     public string Name { get; protected set; }
-    public InventoryItem()
+    public InventoryItem(float weight, float volume, string name)
     {
-        
+        Weight = weight;
+        Volume = volume;
+        Name = name;
     }
 }
