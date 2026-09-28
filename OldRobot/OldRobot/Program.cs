@@ -11,7 +11,7 @@ public class Program
             if ((MainCommands)command == MainCommands.Move)
             {
                 command = new MenuManager<MoveCommands>().Run("What direction would you like to move: ");
-                RobotCommand newCommand = command switch
+                IRobotCommand newCommand = command switch
                 {
                     MoveCommands.North => new NorthCommand(),
                     MoveCommands.East => new EastCommand(),
@@ -22,7 +22,7 @@ public class Program
             }
             else
             {
-                RobotCommand newCommand = command switch
+                IRobotCommand newCommand = command switch
                 {
                     MainCommands.On => new OnCommand(),
                     MainCommands.Off => new OffCommand(),

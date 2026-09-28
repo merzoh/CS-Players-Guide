@@ -1,6 +1,6 @@
 namespace OldRobot;
 
-public class OffCommand : RobotCommand
+public class OffCommand : IRobotCommand
 {
-    public override void Run(Robot robot) => robot.IsPowered = false;
+    public  void Run(Robot robot) => robot.IsPowered = false;
 }
