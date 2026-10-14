@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../../Utilities/ConsoleUtil/ConsoleUtil.csproj" />
+  <Project Path="../../Utilities/MenuManager/MenuManager/MenuManager.csproj" />
+  <Project Path="The Fountain of Objects/The Fountain of Objects.csproj" />
+</Solution>
