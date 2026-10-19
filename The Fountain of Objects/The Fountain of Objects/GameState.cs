@@ -21,12 +21,13 @@ public class GameState
     private Point EntranceLocation { get; set; }
     private bool PlayerMoved { get; set; } = true;
     private bool FountainEnabled { get; set; }
-    private bool Running { get; set; } = true;
+    public bool Running { get; private set; } = true;
     private string GameMessage { get; set; }
     private ConsoleColor GameMessageColor { get; set; }
     private int CaveDimensions { get; set; }
-    private int PlayerPosX { get; set; }
-    private int PlayerPosY { get; set; }
+    private int PlayerPosX { get { return _player.PlayerPosition.X; } }
+    private int PlayerPosY { get { return _player.PlayerPosition.Y; } }
+    private Rooms CurrentRoom { get { return _board[PlayerPosY, PlayerPosX]; }}
 
     //Game Objects
     private Rooms[,] _board;
@@ -41,10 +42,8 @@ public class GameState
     private MenuItem ExitCave;
 
     //Dangers
-    private RoomBuilder Pit;
-    private RoomBuilder Amarok;
-    private List<RoomBuilder> PitList;
-    private List<RoomBuilder> AmarokList;
+    private List<(int y, int x)> PitList;
+    private List<(int y, int x)> AmarokList;
 
 
     //Map Size Options
@@ -55,37 +54,9 @@ public class GameState
     {
         //Initializing properties and danger lists
         FountainEnabled = false;
-        _player = new Player(EntranceLocation);
-        PlayerPosX = _player.PlayerPosition.X;
-        PlayerPosY = _player.PlayerPosition.Y;
         AmarokList = new();
         PitList = new();
 
-        //Initializing dangers
-        Pit = new(
-            "Pit",
-            'X',
-            ConsoleColor.Red,
-            ConsoleColor.Red,
-            "If you are seeing this then that means you are looking at the source code.",
-            "You feel a draft. There is a pit in a nearby room.",
-            () =>
-            {
-                _player.KillPlayer();
-                Running = false;
-            });
-        Amarok = new(
-            "Amarok",
-            'A',
-            ConsoleColor.DarkRed,
-            ConsoleColor.DarkRed,
-            "You shouldn't ever see this.",
-            "You can smell the rotten stench of an amarok in a nearby room.",
-            () =>
-            {
-                _player.KillPlayer();
-                Running = false;
-            });
         //Game size options
         SizeOptions = new()
         {
@@ -109,68 +80,73 @@ public class GameState
                 FountainLocation = new(Random.Shared.Next(0, 7), Random.Shared.Next(0, 7));
             })
         };
-        //Set game size
+        //Set game size and player location to entrance
         var selection = new MenuManager().Run(SizeOptions, "How large of a game would you like?");
         selection.Execute();
+        _player = new Player(EntranceLocation);
         _board = new Rooms[CaveDimensions, CaveDimensions];
+        
         //Initializing rooms with content
         _board[EntranceLocation.Y, EntranceLocation.X] = new Rooms(RoomContents.Entrance);
         _board[EntranceLocation.Y, EntranceLocation.X].VisitRoom();
         _board[FountainLocation.Y, FountainLocation.X] = new Rooms(RoomContents.Fountain);
         switch (CaveDimensions)
         {
-            case 4:
-                do
+            case 4: //Small size
+                //Get pit positions
+                foreach (var pit in GetRoomPositions(1))
                 {
-                    int placementX = Random.Shared.Next(0, 3);
-                    int placementY = Random.Shared.Next(0, 3);
-                    if (_board[placementY, placementX] == null)
-                        _board[placementY, placementX] = new Rooms(Pit);
-                } while (PitList.Count != 1);
-                do
+                    _board[pit.y, pit.x] = new Rooms(RoomContents.Pit);
+                }
+                //Get amarok positions
+                foreach (var amarok in GetRoomPositions(1))
                 {
-                    int placementX = Random.Shared.Next(0, 3);
-                    int placementY = Random.Shared.Next(0, 3);
-                    if (_board[placementY, placementX] == null)
-                        _board[placementY, placementX] = new Rooms(Pit);
-                } while (AmarokList.Count != 1);
+                    _board[amarok.y, amarok.x] = new Rooms(RoomContents.Amarok);
+                }
                 break;
-            case 6:
-                do
+
+            case 6: //Medium size
+                //Get pit positions
+                foreach (var pit in GetRoomPositions(2))
                 {
-                    int placementX = Random.Shared.Next(0, 5);
-                    int placementY = Random.Shared.Next(0, 5);
-                    if (_board[placementY, placementX] == null)
-                        _board[placementY, placementX] = new Rooms(Pit);
-                } while (PitList.Count != 2);
-                do
+                    _board[pit.y, pit.x] = new Rooms(RoomContents.Pit);
+                }
+                //Get amarok positions
+                foreach (var amarok in GetRoomPositions(2))
                 {
-                    int placementX = Random.Shared.Next(0, 5);
-                    int placementY = Random.Shared.Next(0, 5);
-                    if (_board[placementY, placementX] == null)
-                        _board[placementY, placementX] = new Rooms(Pit);
-                } while (AmarokList.Count != 2);
+                    _board[amarok.y, amarok.x] = new Rooms(RoomContents.Amarok);
+                }
                 break;
-            case 8:
-                do
+
+            case 8: //Large size
+                //Get pit positions
+                foreach (var pit in GetRoomPositions(4))
                 {
-                    int placementX = Random.Shared.Next(0, 7);
-                    int placementY = Random.Shared.Next(0, 7);
-                    if (_board[placementY, placementX] == null)
-                        _board[placementY, placementX] = new Rooms(Pit);
-                } while (PitList.Count != 4);
-                do
+                    _board[pit.y, pit.x] = new Rooms(RoomContents.Pit);
+                }
+                //Get amarok positions
+                foreach (var amarok in GetRoomPositions(3))
                 {
-                    int placementX = Random.Shared.Next(0, 7);
-                    int placementY = Random.Shared.Next(0, 7);
-                    if (_board[placementY, placementX] == null)
-                        _board[placementY, placementX] = new Rooms(Pit);
-                } while (AmarokList.Count != 3);
+                    _board[amarok.y, amarok.x] = new Rooms(RoomContents.Amarok);
+                }
                 break;
         }
 
-        
-        
+        //Initializing empty rooms
+        int col = _board.GetLength(0);
+        int row = _board.GetLength(1);
+        for (int i = 0; i < col; i++)
+        {
+            for (int j = 0; j < row; j++)
+            {
+                if (_board[i, j] == null)
+                {
+                    _board[i, j] = new Rooms();
+                }
+            }
+        }
+
+
         //Initializing Actions
         moveOptions = new()
         {
@@ -191,7 +167,7 @@ public class GameState
             Console.ReadKey(true);
             Console.Clear();
         });
-        ExitCave = new("Exit Cave", () => Running = false);
+        ExitCave = new("Exit Cave", () => EndGame());
         EnableFountain = new("Enable Fountain", () =>
         {
             FountainEnabled = true;
@@ -202,23 +178,6 @@ public class GameState
             FountainEnabled = false;
             _board[FountainLocation.Y, FountainLocation.X] = new Rooms(RoomContents.Fountain);
         });
-
-        
-
-        //Initializing empty rooms
-        
-        int col = _board.GetLength(0);
-        int row = _board.GetLength(1);
-        for (int i = 0; i < col; i++)
-        {
-            for (int j = 0; j < row; j++)
-            {
-                if (_board[i, j] == null)
-                {
-                    _board[i, j] = new Rooms();
-                }
-            }
-        }
     }
 
     //Gameloop
@@ -231,8 +190,8 @@ public class GameState
             Console.Clear();
             if (PlayerMoved == true)
             { 
-                GameMessage = _board[PlayerPosY, PlayerPosX].Contents.message;
-                GameMessageColor = _board[PlayerPosY, PlayerPosX].Contents.roomMessageColor;
+                GameMessage = CurrentRoom.Contents.message;
+                GameMessageColor = CurrentRoom.Contents.roomMessageColor;
             }
             var selection = new MenuManager().Run(GetMenuOptions(), "What action would you like to take:", GameMessage, GetExtraInformation(), GameMessageColor, _optionColor);
             selection.Execute();
@@ -251,16 +210,23 @@ public class GameState
         }
         else
         {
-            if (_board[PlayerPosY, PlayerPosX].Contents.OnEnter != null)
-                _board[PlayerPosY, PlayerPosX].Contents.OnEnter();
-            else
-            {
-                PlayerMoved = true;
-                _board[PlayerPosY, PlayerPosX].VisitRoom();
-            }
-            
+            CurrentRoom.Contents.OnEnter?.Invoke(this);
+            PlayerMoved = true;
+            CurrentRoom.VisitRoom();
         }
             
+    }
+    private List<(int y, int x)> GetRoomPositions(int count)
+    {
+        List<(int y, int x)> roomPositions = new();
+        do
+        {
+            int placementX = Random.Shared.Next(0, CaveDimensions);
+            int placementY = Random.Shared.Next(0, CaveDimensions);
+            if (_board[placementY, placementX] == null)
+                roomPositions.Add((placementY, placementX));
+        } while (roomPositions.Count != count);
+        return roomPositions;
     }
     private List<(string, ConsoleColor)> GetExtraInformation()
     {
@@ -276,9 +242,13 @@ public class GameState
                 //Store target locations based on the player's location and offsets
                 int targetX = PlayerPosX + xOffset;
                 int targetY = PlayerPosY + yOffset;
+                
                 if (!(targetX == -1 || targetX == CaveDimensions || targetY == -1 || targetY == CaveDimensions)) //Checks for map bounds
-                    if (_board[targetY, targetX].Contents != RoomContents.Empty || _board[targetY, targetX].Contents != RoomContents.DeadAmarok) //Checks to make sure target room isn't empty
-                        adjacentRooms.Add((_board[targetY, targetX].Contents.roomAdjacencyMessage, _board[targetY, targetX].Contents.roomMessageColor));
+                {
+                    Rooms targetRoom = _board[targetY, targetX];
+                    if (targetRoom.Contents != RoomContents.Empty && targetRoom.Contents != RoomContents.DeadAmarok) //Checks to make sure target room isn't empty
+                        adjacentRooms.Add((targetRoom.Contents.roomAdjacencyMessage, targetRoom.Contents.roomMessageColor));
+                }
             }
         }
         if (adjacentRooms.Count == 0) //Check to see if none of the adjacent rooms had content inside
@@ -322,5 +292,44 @@ public class GameState
                 ConsoleUtility.TypewriterEffectCentered(_loseMessage, 50, ConsoleColor.DarkRed);
         else
             ConsoleUtility.TypewriterEffectCentered(_deathMessage, 50, ConsoleColor.Red);
+    }
+    private void EndGame()
+    {
+        Running = false;
+    }
+
+    public void HazardRoom()
+    {
+        _player.KillPlayer();
+        EndGame();
+    }
+    public void DisplacePlayer()
+    {
+        int xOffset = -1;
+        int yOffset = 2;
+        int targetX;
+        int targetY;
+        //Move the maelstrom
+        CurrentRoom.SetContent(RoomContents.Empty);
+        if (PlayerPosY <= 1)
+            targetY = CaveDimensions + PlayerPosY + (yOffset * -1);
+        else
+            targetY = PlayerPosY + (yOffset * -1);
+        if (PlayerPosX == (CaveDimensions - 1))
+            targetX = 0;
+        else
+            targetX = PlayerPosX + (xOffset * -1);
+        _board[targetY, targetX].SetContent(RoomContents.Maelstrom);
+        //Move the player
+        if (PlayerPosX == 0)
+            targetX = CaveDimensions + xOffset;
+        else
+            targetX = PlayerPosX + xOffset;
+        if ((PlayerPosY + yOffset) > (CaveDimensions - 1))
+            targetY = (PlayerPosY + yOffset) - CaveDimensions;
+        else
+            targetY = PlayerPosY + yOffset;
+        _player.FlyPlayer(targetX, targetY);
+        CurrentRoom.Contents.OnEnter?.Invoke(this);
     }
 }

@@ -25,4 +25,8 @@ public class Player
     {
         Alive = false;
     }
+    public void FlyPlayer(int x, int y)
+    {
+        PlayerPosition = new(x, y);
+    }
 }
