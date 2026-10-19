@@ -54,7 +54,6 @@ public class GameState
     public GameState()
     {
         //Initializing properties and danger lists
-        _board = new Rooms[CaveDimensions, CaveDimensions];
         FountainEnabled = false;
         _player = new Player(EntranceLocation);
         PlayerPosX = _player.PlayerPosition.X;
@@ -113,7 +112,7 @@ public class GameState
         //Set game size
         var selection = new MenuManager().Run(SizeOptions, "How large of a game would you like?");
         selection.Execute();
-
+        _board = new Rooms[CaveDimensions, CaveDimensions];
         //Initializing rooms with content
         _board[EntranceLocation.Y, EntranceLocation.X] = new Rooms(RoomContents.Entrance);
         _board[EntranceLocation.Y, EntranceLocation.X].VisitRoom();
