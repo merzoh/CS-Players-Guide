@@ -1,8 +1,10 @@
+using System.Drawing;
+
 namespace FountainOfObjects;
 
 public class Rooms
 {
-    public bool HasVisited { get; private set; }
+    public bool HasVisited { get; private set; } = false;
     public RoomBuilder Contents { get; private set; }
     public Rooms()
     {
@@ -11,8 +13,15 @@ public class Rooms
     }
     public Rooms(RoomBuilder contents)
     {
-        HasVisited = false;
+        Contents = contents;
+
+    }
+    public void VisitRoom()
+    {
+        HasVisited = true;
+    }
+    public void SetContent(RoomBuilder contents)
+    {
         Contents = contents;
     }
-
 }

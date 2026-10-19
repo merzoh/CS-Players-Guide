@@ -5,18 +5,24 @@ namespace FountainOfObjects;
 public class Player
 {
     public Point PlayerPosition { get; private set; }
+    public bool Alive { get; private set; }
 
-    public Player()
+    public Player(Point startPoint)
     {
-        PlayerPosition = new Point(0, 0);
+        PlayerPosition = startPoint;
+        Alive = true;
     }
-    public bool Move(int x, int y)
+    public bool Move(int x, int y, int gameSize)
     {
-        if ((PlayerPosition.X + x < 0 || PlayerPosition.X + x > 3) || (PlayerPosition.Y + y < 0 || PlayerPosition.Y + y > 3))
+        if ((PlayerPosition.X + x < 0 || PlayerPosition.X + x > gameSize) || (PlayerPosition.Y + y < 0 || PlayerPosition.Y + y > gameSize))
         {
             return false;
         }
         PlayerPosition = new Point(PlayerPosition.X + x, PlayerPosition.Y + y);
         return true;
+    }
+    public void KillPlayer()
+    {
+        Alive = false;
     }
 }
