@@ -40,10 +40,10 @@ public class GameState
     private  MenuItem DisableFountain;
     private MenuItem Map;
     private MenuItem ExitCave;
+    private MenuItem ShootBow;
+    private List<MenuItem> shootOptions;
 
-    //Dangers
-    private List<(int y, int x)> PitList;
-    private List<(int y, int x)> AmarokList;
+
 
 
     //Map Size Options
@@ -54,8 +54,6 @@ public class GameState
     {
         //Initializing properties and danger lists
         FountainEnabled = false;
-        AmarokList = new();
-        PitList = new();
 
         //Game size options
         SizeOptions = new()
@@ -82,7 +80,7 @@ public class GameState
         };
         //Set game size and player location to entrance
         var selection = new MenuManager().Run(SizeOptions, "How large of a game would you like?");
-        selection.Execute();
+        selection.Execute!();
         _player = new Player(EntranceLocation);
         _board = new Rooms[CaveDimensions, CaveDimensions];
         
@@ -90,6 +88,7 @@ public class GameState
         _board[EntranceLocation.Y, EntranceLocation.X] = new Rooms(RoomContents.Entrance);
         _board[EntranceLocation.Y, EntranceLocation.X].VisitRoom();
         _board[FountainLocation.Y, FountainLocation.X] = new Rooms(RoomContents.Fountain);
+        //Initializing Dangerous rooms
         switch (CaveDimensions)
         {
             case 4: //Small size
@@ -102,6 +101,11 @@ public class GameState
                 foreach (var amarok in GetRoomPositions(1))
                 {
                     _board[amarok.y, amarok.x] = new Rooms(RoomContents.Amarok);
+                }
+                //Get maelstrom positions
+                foreach (var maelstrom in GetRoomPositions(1))
+                {
+                    _board[maelstrom.y, maelstrom.x] = new Rooms(RoomContents.Maelstrom);
                 }
                 break;
 
@@ -116,6 +120,11 @@ public class GameState
                 {
                     _board[amarok.y, amarok.x] = new Rooms(RoomContents.Amarok);
                 }
+                //Get maelstrom positions
+                foreach (var maelstrom in GetRoomPositions(1))
+                {
+                    _board[maelstrom.y, maelstrom.x] = new Rooms(RoomContents.Maelstrom);
+                }
                 break;
 
             case 8: //Large size
@@ -129,8 +138,13 @@ public class GameState
                 {
                     _board[amarok.y, amarok.x] = new Rooms(RoomContents.Amarok);
                 }
+                //Get maelstrom positions
+                foreach (var maelstrom in GetRoomPositions(2))
+                {
+                    _board[maelstrom.y, maelstrom.x] = new Rooms(RoomContents.Maelstrom);
+                }
                 break;
-        }
+        } 
 
         //Initializing empty rooms
         int col = _board.GetLength(0);
@@ -153,13 +167,14 @@ public class GameState
             new("North", () => TryMove(0, -1)),
             new("South", () => TryMove(0, 1)),
             new("East", () => TryMove(1, 0)),
-            new("West", () => TryMove(-1, 0))
+            new("West", () => TryMove(-1, 0)),
+            new("Back")
         };
         Move = new("Move", () =>
         {
             Console.Clear();
             var selection = new MenuManager().Run(moveOptions, "Which direction would you like to move?", _optionColor);
-            selection.Execute();
+            selection.Execute?.Invoke();
         });
         Map = new("Map", () => 
         {
@@ -178,6 +193,55 @@ public class GameState
             FountainEnabled = false;
             _board[FountainLocation.Y, FountainLocation.X] = new Rooms(RoomContents.Fountain);
         });
+        shootOptions = new()
+        {
+            new("Shoot North", () =>
+            {
+                _player.ShootArrow();
+                SendArrowToRoom(-1, 0);
+                GameMessage = "You fired an arrow into the room to the north.";
+                GameMessageColor = ConsoleColor.DarkGreen;
+            }),
+            new("Shoot East", () =>
+            {
+                _player.ShootArrow();
+                SendArrowToRoom(0, 1);
+                GameMessage = "You fired an arrow into the room to the east.";
+                GameMessageColor = ConsoleColor.DarkGreen;
+            }),
+            new("Shoot South", () =>
+            {
+                _player.ShootArrow();
+                SendArrowToRoom(1, 0);
+                GameMessage = "You fired an arrow into the room to the south.";
+                GameMessageColor = ConsoleColor.DarkGreen;
+            }),
+            new("Shoot West", () =>
+            {
+                _player.ShootArrow();
+                SendArrowToRoom(0, -1);
+                GameMessage = "You fired an arrow into the room to the west.";
+                GameMessageColor = ConsoleColor.DarkGreen;
+            }),
+            new("Back")
+
+        };
+        ShootBow = new("Shoot Bow", () =>
+        {
+            if (_player.Arrows != 0)
+            {
+                PlayerMoved = false;
+                var selection = new MenuManager().Run(shootOptions, "What direction would you like to fire your bow?", _optionColor);
+                selection.Execute?.Invoke();
+            }
+            else
+            {
+                PlayerMoved = false;
+                GameMessage = "Your quiver is empty!";
+                GameMessageColor = ConsoleColor.DarkGray;
+            }
+            
+        });
     }
 
     //Gameloop
@@ -194,7 +258,7 @@ public class GameState
                 GameMessageColor = CurrentRoom.Contents.roomMessageColor;
             }
             var selection = new MenuManager().Run(GetMenuOptions(), "What action would you like to take:", GameMessage, GetExtraInformation(), GameMessageColor, _optionColor);
-            selection.Execute();
+            selection.Execute!();
          } while (Running);
         Exit();
     }
@@ -331,5 +395,9 @@ public class GameState
             targetY = PlayerPosY + yOffset;
         _player.FlyPlayer(targetX, targetY);
         CurrentRoom.Contents.OnEnter?.Invoke(this);
+    }
+    private void SendArrowToRoom(int xOffset, int yOffset)
+    {
+
     }
 }

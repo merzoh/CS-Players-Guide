@@ -6,6 +6,7 @@ public class Player
 {
     public Point PlayerPosition { get; private set; }
     public bool Alive { get; private set; }
+    public int Arrows { get; private set; } = 5;
 
     public Player(Point startPoint)
     {
@@ -28,5 +29,9 @@ public class Player
     public void FlyPlayer(int x, int y)
     {
         PlayerPosition = new(x, y);
+    }
+    public void ShootArrow()
+    {
+        Arrows--;
     }
 }
