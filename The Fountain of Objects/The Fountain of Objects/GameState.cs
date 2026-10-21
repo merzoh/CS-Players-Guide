@@ -52,42 +52,33 @@ public class GameState
     //Constructor
     public GameState()
     {
-        //Initializing properties and danger lists
+        //Initializing a couple properties
         FountainEnabled = false;
+        FountainLocation = new(-1, -1);
 
         //Game size options
         SizeOptions = new()
         {
-            new("Small", () =>
-            {
-                CaveDimensions = 4;
-                EntranceLocation = new(0, 0);
-                FountainLocation = new(Random.Shared.Next(0, 3), Random.Shared.Next(0, 3));
-
-            }),
-            new("Medium", () =>
-            {
-                CaveDimensions = 6;
-                EntranceLocation = new(5, 4);
-                FountainLocation = new(Random.Shared.Next(0, 5), Random.Shared.Next(0, 5));
-            }),
-            new("Large", () =>
-            {
-                CaveDimensions = 8;
-                EntranceLocation = new(0, 7);
-                FountainLocation = new(Random.Shared.Next(0, 7), Random.Shared.Next(0, 7));
-            })
+            new("Small", () => CaveDimensions = 4),
+            new("Medium", () => CaveDimensions = 6),
+            new("Large", () => CaveDimensions = 8)
         };
-        //Set game size and player location to entrance
+        //Get game size choice
         var selection = new MenuManager().Run(SizeOptions, "How large of a game would you like?");
         selection.Execute!();
-        _player = new Player(EntranceLocation);
+        //Initialize _board array
         _board = new Rooms[CaveDimensions, CaveDimensions];
-        
+
         //Initializing rooms with content
+        GenerateEntranceLocation();
         _board[EntranceLocation.Y, EntranceLocation.X] = new Rooms(RoomContents.Entrance);
         _board[EntranceLocation.Y, EntranceLocation.X].VisitRoom();
+        GenerateFountainLocation();
         _board[FountainLocation.Y, FountainLocation.X] = new Rooms(RoomContents.Fountain);
+
+        //Initialize player object and set location to entrance
+        _player = new Player(EntranceLocation);
+
         //Initializing Dangerous rooms
         switch (CaveDimensions)
         {
@@ -198,28 +189,28 @@ public class GameState
             new("Shoot North", () =>
             {
                 _player.ShootArrow();
-                SendArrowToRoom(-1, 0);
+                SendArrowToRoom(0, -1);
                 GameMessage = "You fired an arrow into the room to the north.";
                 GameMessageColor = ConsoleColor.DarkGreen;
             }),
             new("Shoot East", () =>
             {
                 _player.ShootArrow();
-                SendArrowToRoom(0, 1);
+                SendArrowToRoom(1, 0);
                 GameMessage = "You fired an arrow into the room to the east.";
                 GameMessageColor = ConsoleColor.DarkGreen;
             }),
             new("Shoot South", () =>
             {
                 _player.ShootArrow();
-                SendArrowToRoom(1, 0);
+                SendArrowToRoom(0, 1);
                 GameMessage = "You fired an arrow into the room to the south.";
                 GameMessageColor = ConsoleColor.DarkGreen;
             }),
             new("Shoot West", () =>
             {
                 _player.ShootArrow();
-                SendArrowToRoom(0, -1);
+                SendArrowToRoom(-1, 0);
                 GameMessage = "You fired an arrow into the room to the west.";
                 GameMessageColor = ConsoleColor.DarkGreen;
             }),
@@ -231,7 +222,7 @@ public class GameState
             if (_player.Arrows != 0)
             {
                 PlayerMoved = false;
-                var selection = new MenuManager().Run(shootOptions, "What direction would you like to fire your bow?", _optionColor);
+                var selection = new MenuManager().Run(shootOptions, $"You have {_player.Arrows} arrows remaining in your quiver. What direction would you like to fire your bow?", _optionColor);
                 selection.Execute?.Invoke();
             }
             else
@@ -324,7 +315,8 @@ public class GameState
         List<MenuItem> options = new()
         {
             Move,
-            Map
+            Map,
+            ShootBow
         };
         if (_player.PlayerPosition == FountainLocation)
         {
@@ -369,35 +361,119 @@ public class GameState
     }
     public void DisplacePlayer()
     {
-        int xOffset = -1;
-        int yOffset = 2;
-        int targetX;
-        int targetY;
+        int xOffset = 2;
+        int yOffset = -1;
+        int targetX = 0;
+        int targetY = 0;
+        bool maelstromMoved = false;
+        bool moveFailed = false;
         //Move the maelstrom
         CurrentRoom.SetContent(RoomContents.Empty);
-        if (PlayerPosY <= 1)
-            targetY = CaveDimensions + PlayerPosY + (yOffset * -1);
-        else
-            targetY = PlayerPosY + (yOffset * -1);
-        if (PlayerPosX == (CaveDimensions - 1))
-            targetX = 0;
-        else
-            targetX = PlayerPosX + (xOffset * -1);
-        _board[targetY, targetX].SetContent(RoomContents.Maelstrom);
+        do
+        {
+            if (!moveFailed)
+            {
+                if (PlayerPosX <= 1)
+                    targetX = CaveDimensions + PlayerPosX + (xOffset * -1);
+                else
+                    targetX = PlayerPosX + (xOffset * -1);
+                if (PlayerPosY == (CaveDimensions - 1))
+                    targetY = 0;
+                else
+                    targetY = PlayerPosY + (yOffset * -1);
+                if (_board[targetY, targetX].Contents == RoomContents.Empty)
+                {
+                    _board[targetY, targetX].SetContent(RoomContents.Maelstrom);
+                    maelstromMoved = true;
+                }
+                else
+                    moveFailed = true;
+            }
+            else
+            {
+                if (targetX + (xOffset * -1) == -1)
+                    targetX = CaveDimensions - 1;
+                else
+                    targetX += xOffset * -1;
+                if (targetY == CaveDimensions - 1)
+                    targetY = 0;
+                else
+                    targetY += yOffset * -1;
+                if (_board[targetY, targetX].Contents == RoomContents.Empty)
+                {
+                    _board[targetY, targetX].SetContent(RoomContents.Maelstrom);
+                    maelstromMoved = true;
+                }
+            }
+        } while (!maelstromMoved);
+        
         //Move the player
-        if (PlayerPosX == 0)
-            targetX = CaveDimensions + xOffset;
-        else
-            targetX = PlayerPosX + xOffset;
-        if ((PlayerPosY + yOffset) > (CaveDimensions - 1))
-            targetY = (PlayerPosY + yOffset) - CaveDimensions;
+        if (PlayerPosY == 0)
+            targetY = CaveDimensions + yOffset;
         else
             targetY = PlayerPosY + yOffset;
+        if ((PlayerPosX + xOffset) > (CaveDimensions - 1))
+            targetX = (PlayerPosX + xOffset) - CaveDimensions;
+        else
+            targetX = PlayerPosX + xOffset;
         _player.FlyPlayer(targetX, targetY);
         CurrentRoom.Contents.OnEnter?.Invoke(this);
     }
     private void SendArrowToRoom(int xOffset, int yOffset)
     {
-
+        int targetX = PlayerPosX + xOffset;
+        int targetY = PlayerPosY + yOffset;
+        if (!(targetX == CaveDimensions || targetX == -1 || targetY == CaveDimensions || targetY == -1))
+        {
+            if (_board[targetY, targetX].Contents == RoomContents.Amarok)
+                _board[targetY, targetX].SetContent(RoomContents.DeadAmarok);
+        }
+    }
+    private void GenerateEntranceLocation()
+    {
+        int placementX;
+        int placementY;
+        int XorYfirst = Random.Shared.Next(0, 2);
+        if (XorYfirst == 0) //X coordinate placed first
+        {
+            placementX = Random.Shared.Next(0, CaveDimensions); //Set placementX
+            if (placementX == 0 || placementX == CaveDimensions - 1) //If the x coordinate is on a corner
+                placementY = Random.Shared.Next(0, CaveDimensions - 1); //Place the y coordinate anywhere
+            else //X wasn't placed on a corner
+            {
+                int topOrBottom = Random.Shared.Next(0, 2); //Since X wasn't on a corner either put X on the top or bottom rather than the sides.
+                if (topOrBottom == 0)
+                    placementY = 0;
+                else
+                    placementY = CaveDimensions - 1;
+            }
+        }
+        else
+        {
+            placementY = Random.Shared.Next(0, CaveDimensions);
+            if (placementY == 0 || placementY == CaveDimensions - 1)
+                placementX = Random.Shared.Next(0, CaveDimensions);
+            else
+            {
+                int leftOrRight = Random.Shared.Next(0, 2);
+                if (leftOrRight == 0)
+                    placementX = 0;
+                else
+                    placementX = CaveDimensions - 1;
+            }
+        }
+        EntranceLocation =  new Point(placementX, placementY);
+    }
+    private void GenerateFountainLocation()
+    {
+        int placementX;
+        int placementY;
+        do
+        {
+            placementX = Random.Shared.Next(0, CaveDimensions);
+            placementY = Random.Shared.Next(0, CaveDimensions);
+            if (_board[placementY, placementX] == null)
+                FountainLocation = new(placementX, placementY);
+        } while (FountainLocation == new Point (-1, -1));
     }
 }
