@@ -15,6 +15,7 @@ public class GameState
     private readonly string _winMessage = "You have ventured deep through the darkness, found the Fountain of Objects, returned the Fountain to it's former glory spewing objects out for all, and returned the entrance safely. Congratulations!";
     private readonly string _loseMessage = "You have left the cave having failed your quest. All in the land will suffer due to your failure.";
     private readonly string _deathMessage = "You have succumb to one of the many dangers lurking in these caves. Tales will be told of your adventures and their subsequent end during your final quest to restore the Fountain of Objects.";
+    private readonly DateTime _entryTime;
 
     //Properties
     private Point FountainLocation { get; set; }
@@ -28,6 +29,7 @@ public class GameState
     private int PlayerPosX { get { return _player.PlayerPosition.X; } }
     private int PlayerPosY { get { return _player.PlayerPosition.Y; } }
     private Rooms CurrentRoom { get { return _board[PlayerPosY, PlayerPosX]; }}
+    private TimeSpan TimeInCave { get { return DateTime.UtcNow - _entryTime; } }
 
     //Game Objects
     private Rooms[,] _board;
@@ -52,7 +54,8 @@ public class GameState
     //Constructor
     public GameState()
     {
-        //Initializing a couple properties
+        //Initializing a couple properties and fields
+        _entryTime = DateTime.UtcNow;
         FountainEnabled = false;
         FountainLocation = new(-1, -1);
 
@@ -252,6 +255,7 @@ public class GameState
             selection.Execute!();
          } while (Running);
         Exit();
+        PrintTimeInCave();
     }
 
     //Helper methods
@@ -475,5 +479,10 @@ public class GameState
             if (_board[placementY, placementX] == null)
                 FountainLocation = new(placementX, placementY);
         } while (FountainLocation == new Point (-1, -1));
+    }
+    private void PrintTimeInCave()
+    {
+        ConsoleUtility.PrintCenteredMessage($"Time spent in cave: {Math.Round(TimeInCave.TotalMinutes)} minutes", Console.WindowHeight / 2);
+        Console.ReadKey(true);
     }
 }
